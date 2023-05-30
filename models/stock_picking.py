@@ -18,11 +18,10 @@ class StockPicking(models.Model):
             package_fields_to_check = CHECKED_PACKAGE_FIELD_BY_PICKING_TYPE[each.picking_type_code]
             for check_field in package_fields_to_check:
                 for ml in each.move_line_ids:
-                    domain = [('picking_id', '=', each.id), ('product_id', '=', ml.product_id.id), ('id', '!=', ml.id),
-                              ('%s_name' % check_field, '=', getattr(ml, '%s_name' % check_field))]
                     if not getattr(ml,check_field,False):
                         continue
-
+                    domain = [('picking_id', '=', each.id), ('product_id', '=', ml.product_id.id), ('id', '!=', ml.id),
+                              ('%s_name' % check_field, '=', getattr(ml, '%s_name' % check_field))]
                     if self.env['stock.move.line'].search_count(domain):
                         raise ValidationError(_("Package reference must be unique by product in this type of transfer"))
 
