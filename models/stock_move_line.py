@@ -2,6 +2,7 @@
 
 from odoo import models,fields,api,_
 from odoo.exceptions import ValidationError
+from odoo.addons.stock_picking_type_package_name_unique_by_product.models.stock_picking import CHECKED_PACKAGE_FIELD_BY_PICKING_TYPE
 
 
 
@@ -34,6 +35,17 @@ class StockMoveLine(models.Model):
 
     def write(self, vals):
         res = super(StockMoveLine, self).write(vals)
+        # if the write doesn't touch any of the fields that must be controled for package unicity we have to avoid the check
+        # this is because the check is very costly in the case of picking with many move_line_ids and this is even when no
+        # field that must be controlled are modified,so we have sacrified the code simplicity for the sake of performance
+        # it is always tradeoff choice!!!
+        try:
+            package_fields_to_check = CHECKED_PACKAGE_FIELD_BY_PICKING_TYPE[self.mapped("picking_code")[0]]
+            fields_to_edit = tuple(vals.keys())
+            if not set(package_fields_to_check).intersection(set(fields_to_edit)):
+                return res
+        except IndexError:
+            return res
         self.mapped('picking_id')._check_product_id_package_name_unicity()
         return res
 
