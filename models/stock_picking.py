@@ -9,7 +9,8 @@ CHECKED_PACKAGE_FIELD_BY_PICKING_TYPE = {
     'incoming':('result_package_id',),
     'internal':('package_id','result_package_id'),
     'outgoing':('package_id',),
-    False:('package_id','result_package_id'),
+    'mrp_operation':('result_package_id',),
+     False:('package_id','result_package_id'),
 }
 
 class StockPicking(models.Model):
